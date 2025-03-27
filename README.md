@@ -1,7 +1,6 @@
 PROJECT FOLDER FOR ELECTRO PROJECT 2025 
 
-
-SETUP:
+FOR SETUP WITH ARDUINO IDE:
 
 1. Configure Board
     Press Ctrl+Shift+P
