@@ -1,6 +1,8 @@
-PROJECT FOLDER FOR ELECTRO PROJECT 2025 
+Project folder for KTH Electrical Engineering 1st year project course. 
 
-SETUP:
+
+
+FOR SETUP WITH ARDUINO IDE:
 
 1. Open Arduino IDE
 
