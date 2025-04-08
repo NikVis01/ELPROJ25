@@ -1,6 +1,8 @@
 // This is a test code snippet gathered from https://www.manelsoft.com/projects/arduino_sim800.aspx 
 // It describes how to get the AT commands from a SIM800 module.
 
+// NOTE: THIS CODE IS FOR ARDUINO UNO FOR NANO IT MIGHT LOOK A LITTLE DIFFERENT
+
 //SIM800L Tx & Rx is connected to Arduino 7 & 8
 SoftwareSerial gsmSerial(7, 8); 
 
