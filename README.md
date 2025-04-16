@@ -5,7 +5,7 @@ Workflow:
 - Configure local arduino IDE
 - Load sketches onto board for testing
 
-Dokumentation for sensors and other components:
+Documentation for sensors and other components:
 
 https://wiki.dfrobot.com/Turbidity_sensor_SKU__SEN0189
 
