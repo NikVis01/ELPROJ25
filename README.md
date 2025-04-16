@@ -14,3 +14,8 @@ https://lastminuteengineers.com/sim800l-gsm-module-arduino-tutorial/
 https://github.com/m5stack/M5Stack/blob/master/examples/Modules/SIM800L/send_short_message/send_short_message.ino
 
 https://docs.arduino.cc/hardware/nano/
+
+FOR SIM800L:
+- TxD mapped to nano digitalPin 3 (w resistor in between)
+- RxD mapped to digitalPin 5
+- DTR (sleep mode activate) mapped to digitalPin 9
