@@ -16,6 +16,7 @@ https://github.com/m5stack/M5Stack/blob/master/examples/Modules/SIM800L/send_sho
 https://docs.arduino.cc/hardware/nano/
 
 FOR SIM800L:
-- TxD mapped to nano digitalPin 3 (w resistor in between)
-- RxD mapped to digitalPin 5
-- DTR (sleep mode activate) mapped to digitalPin 9
+- TxD (green) mapped to nano digitalPin 2 (w resistor in between)
+- RxD (blue) mapped to digitalPin 9
+- DTR (brown) (sleep mode activate) mapped to digitalPin 4
+- RST (grey) to digitalPin 7
