@@ -1,51 +1,56 @@
-// This is a test code snippet gathered from https://www.manelsoft.com/projects/arduino_sim800.aspx 
-// It describes how to get the AT commands from a SIM800 module.
+#include <SoftwareSerial.h>
 
-// NOTE: THIS CODE IS FOR ARDUINO UNO FOR NANO IT MIGHT LOOK A LITTLE DIFFERENT
+// Defining Rx and Tx pins
+const byte TxPin = 9;
+const byte RxPin = 2;
 
-//SIM800L Tx & Rx is connected to Arduino 7 & 8
-SoftwareSerial gsmSerial(7, 8); 
+// Defining reset and sleep mode pins
+// const byte RstPin = 7; // Reset, pull LOW for hard reset
+// const byte DtrPin = 4; // Sleep mode, pull HIGH to enter sleepmode and stop serial coms, pull LOW for 50 ms to exit sleepmode
 
-void setup()
-{
-  //Start serial communication
+// Create software serial object to communicate with SIM800L
+SoftwareSerial mySerial(TxPin, RxPin);  //SIM800L Tx & Rx is connected to Arduino D9 & D2
+
+void setup() {
+  // Begin serial communication with Arduino and Arduino IDE (Serial Monitor)
   Serial.begin(9600);
-  gsmSerial.begin(9600);
+
+  // Setting reset and sleep to proper high/low to turn on module
+  // pinMode(RstPin, OUTPUT);
+  // pinMode(DtrPin, OUTPUT);
+
+  // digitalWrite(RstPin, LOW); // Hard reset of the module at the beginning
+  // digitalWrite(DtrPin, LOW); // Wakey wakey eggs and bakey
+
+
+  // Begin serial communication with Arduino and SIM800L
+  mySerial.begin(9600);
 
   Serial.println("Initializing...");
   delay(1000);
 
-  gsmSerial.println("AT"); //Basic AT command
+  Serial.println("Starting AT handshake");
+  
+  mySerial.println("AT"); // If hanshake successfull should return OK
   updateSerial();
-  gsmSerial.println("AT+CSQ"); //GSM signal strength. 0-31 , 31 is the best
+  mySerial.println("AT+CSQ"); // Signal quality test, value range is 0-31 , 31 is the best
   updateSerial();
-  gsmSerial.println("AT+CCID"); //Read SIM card information
+  mySerial.println("AT+CCID"); // Read SIM information to confirm whether the SIM is plugged
   updateSerial();
-  gsmSerial.println("AT+CREG?"); //Check if the module is registered to a network
-  updateSerial();
-  gsmSerial.println("AT+CBC"); //Charging status and remaining battery capacity
-  updateSerial();
-  gsmSerial.println("AT+GSV"); //Product information
+  mySerial.println("AT+CREG?"); //Check whether it has registered in the network
   updateSerial();
 }
 
-void loop()
-{
+void loop() {
   updateSerial();
 }
 
-//Method for serial communication
-void updateSerial()
-{
+void updateSerial() {
   delay(500);
-  while (Serial.available()) 
-  {
-    gsmSerial.write(Serial.read());
+  while (Serial.available()) {
+    mySerial.write(Serial.read()); // Forward what Serial received to Software Serial Port
   }
-  while(gsmSerial.available()) 
-  {
-    Serial.write(gsmSerial.read());
+  while (mySerial.available()) {
+    Serial.write(mySerial.read()); // Forward what Software Serial received to Serial Port
   }
 }
-
-                    

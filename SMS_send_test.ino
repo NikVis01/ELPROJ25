@@ -1,11 +1,18 @@
-// This is a test code snippet gathered from https://www.manelsoft.com/projects/arduino_sim800.aspx
+// This is a test code snippet altered from https://www.manelsoft.com/projects/arduino_sim800.aspx
 // It describes how to send an SMS using a SIM800 module.
-
-// NOTE: THIS CODE IS FOR ARDUINO UNO FOR NANO IT MIGHT LOOK A LITTLE DIFFERENT
 
 #include <SoftwareSerial.h>
 
-SoftwareSerial gsmSerial(7, 8);
+// Defining Rx and Tx pins
+const byte TxPin = 9;
+const byte RxPin = 2;
+
+// Defining reset and sleep mode pins
+// const byte RstPin = 7; // Reset, pull LOW for hard reset
+// const byte DtrPin = 4; // Sleep mode, pull HIGH to enter sleepmode and stop serial coms, pull LOW for 50 ms to exit sleepmode
+
+
+SoftwareSerial gsmSerial(TxPin, RxPin);
 
 void setup()
 {
@@ -20,9 +27,9 @@ void setup()
   updateSerial();
   gsmSerial.println("AT+CMGF=1");// Change to text mode
   updateSerial();
-  gsmSerial.println("AT+CMGS=\"+94123456789\""); //Your mobile number with country code
+  gsmSerial.println("AT+CMGS=\"+46793134464\""); //Your mobile number with country code
   updateSerial();
-  gsmSerial.print("Hello, Regards from SIM800"); //Your message
+  gsmSerial.print("Big balling"); //Your message
   updateSerial();
   gsmSerial.write(26);
 }
