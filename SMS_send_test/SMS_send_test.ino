@@ -3,14 +3,12 @@
 
 #include <SoftwareSerial.h>
 
-// Defining Rx and Tx pins
-const byte TxPin = 9;
-const byte RxPin = 2;
+const byte TxPin = 2; // Arduino Tx --> SIM800L RxD 
+const byte RxPin = 9; // SIM800L TxD --> Arduino Rx
 
-// Defining reset and sleep mode pins
-// const byte RstPin = 7; // Reset, pull LOW for hard reset
-// const byte DtrPin = 4; // Sleep mode, pull HIGH to enter sleepmode and stop serial coms, pull LOW for 50 ms to exit sleepmode
-
+// Below is currently unused:
+const byte RstPin = 7; // Reset, pull LOW for hard reset
+const byte DtrPin = 4; // Sleep mode, pull HIGH to enter sleepmode, pull LOW for 50 ms to exit sleepmode
 
 SoftwareSerial gsmSerial(TxPin, RxPin);
 
@@ -39,7 +37,7 @@ void loop()
   //Nothing to do with the loop in this code
 }
 
-//Method for serial communications
+// Method for serial coms back and forth between SIM800L and Nano
 void updateSerial()
 {
   delay(500);
