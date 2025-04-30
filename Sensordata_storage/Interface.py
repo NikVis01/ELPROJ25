@@ -42,7 +42,6 @@ class ArduinoDataRetriever:
                     today_data += line + "\n"
         return today_data
 
-
 if __name__ == "__main__":
     print("Interface for BojBott\n")
 
