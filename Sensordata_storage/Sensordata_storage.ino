@@ -26,10 +26,47 @@ void setup() {
   EEPROM.get(32, current_day); // Writing current_day and last_log_time to addresses far enough away for those reserved for sensor data to account for sensor data storage 
   EEPROM.get(34, last_log_time); // Accounting for rough size estimate of runtime vars (2 bytes)
 
+}
+
+
+void loop() {
+  unsigned long now = millis();
+  if ((now - last_log_time >= ONE_DAY_MS) && current_day < DAYS_TO_STORE) {
+    logToday();
+    last_log_time = now;
+    EEPROM.put(30, current_day);
+    EEPROM.put(32, last_log_time);
+}
+  if (Serial.available()) {
+  char c = Serial.read();
+  if (c == 'R') {
+    retrieveAll();
+  }
+}
 
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
 
+void logToday() {
+  int temp = analogRead(TEMP_PIN);
+  int turb = analogRead(TURBIDITY_PIN);
+  int addr = current_day * 4;
+  EEPROM.put(addr, temp);
+  EEPROM.put(addr + 2, turb);
+  current_day++;
+}
+
+
+void retrieveAll() {
+  for (int i = 0; i < current_day; i++) {
+    int temp, turb;
+    EEPROM.get(i * 4, temp);
+    EEPROM.get(i * 4 + 2, turb);
+    Serial.print("Day ");
+    Serial.print(i);
+    Serial.print(": Temp=");
+    Serial.print(temp);
+    Serial.print(", Turbidity=");
+    Serial.println(turb);
+  }
 }
