@@ -8,12 +8,12 @@
 
 
 //// --- Defnining global variables & Pins --- // 
-const int TEMP_PIN = A0;
-const int TURBIDITY_PIN = A1; // Double check which pins i put these in
-const byte DAYS_TO_STORE = 7; // Starting with 7
-const unsigned long ONE_DAY_MS = 24UL * 60UL * 60UL * 1000UL; // 24 hours, unsigned for ovf mitigation
+const int TEMP_PIN = A6;
+const int TURBIDITY_PIN = A2; // Double check which pins i put these in
+const byte DAYS_TO_STORE = 7; // Starting with 7 for now
+const unsigned long ONE_DAY_MS = 24UL * 60UL * 60UL * 1000UL; // 24 hours, unsigned
 
-//// --- Memory allocation & Runtime state variables ---- ////
+//// --- Memory allocation & Runtime state variables --- ////
 // addresses 0-31 are allocated for sensor readings (turbidity and temperature)
 // Assuming sensors require 2bytes each we have (2+2)*7 = 28 (starting at 0 gives address 27 as final address for sensors) and adding a buffer at addresses 28-32 means we can store runtime vars in 32+
  
@@ -28,36 +28,63 @@ void setup() {
 
 }
 
-
+// --- Main Loop --- //
 void loop() {
-  unsigned long now = millis();
+  // Designed to continously check (once per sec) if its time to read the data from the sensors, depending on how much time has passed since latest log time
+  unsigned long now = millis(); // millis() tracks no. of seconds since system init (nano powered on)
   if ((now - last_log_time >= ONE_DAY_MS) && current_day < DAYS_TO_STORE) {
     logToday();
     last_log_time = now;
     EEPROM.put(30, current_day);
     EEPROM.put(32, last_log_time);
-}
+  }
   if (Serial.available()) {
   char c = Serial.read();
-  if (c == 'R') {
-    retrieveAll();
+    if (c == 'R') {
+      retrieveAll();
+    }
+    if (c == 'L') {
+      logNow();
+    }
   }
-}
+
+  delay(1000); // Currently checking once per second for testing, but this can be increased to minimize idle CPU usage
 
 }
 
-
+// --- Logging Today Fn --- //
 void logToday() {
+  // Reads sensor data and puts them in allocated memory
+  // Each read returns a 10 bit val, corresponding to 2 bytes
   int temp = analogRead(TEMP_PIN);
   int turb = analogRead(TURBIDITY_PIN);
-  int addr = current_day * 4;
+  int addr = current_day * 4; // Calculating address offset, each day takes 4 bytes so day 0 -> addr 0-3, day 1 -> addr 4-7, etc...
   EEPROM.put(addr, temp);
   EEPROM.put(addr + 2, turb);
-  current_day++;
+  current_day++; // Incrementing day
 }
 
+// --- Logging Now Fn --- //
+void logNow() {
+  // Exactly like Log today fn but overwrites day 0 addresses so we dont take day into account (for testing)
+  int temp = analogRead(TEMP_PIN);
+  int turb = analogRead(TURBIDITY_PIN);
 
+  // Overwrite day 0
+  EEPROM.put(0, temp);
+  EEPROM.put(2, turb);
+
+  // Send to Serial immediately
+  Serial.print("Today - Temp=");
+  Serial.print(temp);
+  Serial.print(", Turbidity=");
+  Serial.println(turb);
+  Serial.println("END");  // To signal end of data
+}
+
+// --- Retrieval Fn --- //
 void retrieveAll() {
+  // Loops through readings for each "day" and prints them in the serial
   for (int i = 0; i < current_day; i++) {
     int temp, turb;
     EEPROM.get(i * 4, temp);
@@ -68,5 +95,6 @@ void retrieveAll() {
     Serial.print(temp);
     Serial.print(", Turbidity=");
     Serial.println(turb);
+    Serial.println("END"); // Will be picked up by python script to terminate read loop
   }
 }
