@@ -25,7 +25,7 @@ void setup()
   updateSerial();
   gsmSerial.println("AT+CMGF=1");// Change to text mode
   updateSerial();
-  gsmSerial.println("AT+CMGS=\"+46793134464\""); //Your mobile number with country code
+  gsmSerial.println("AT+CMGS=\"+46xxxxxxxxx\""); // Mobile number with country code
   updateSerial();
   gsmSerial.print("Big balling"); //Your message
   updateSerial();

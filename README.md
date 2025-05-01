@@ -1,22 +1,22 @@
-PROJECT FOLDER FOR ELECTRO PROJECT 2025 
+### PROJECT FOLDER FOR ELECTRO PROJECT 2025 
 
-Workflow:
-- Download files
-- Configure local arduino IDE
-- Load sketches onto board for testing
+## Code structure:
+# 1. Get_AT_commands / Get_AT_commands
+Communicates with the SIM800L back and forth through Tx and Rx and vice versa on Nano and SIM800L respectively
+Used for debugging of network connectivity and checking signal strength
+This code never worked because of what is assumed to be a faulty GSM module
 
-Documentation for sensors and other components:
+# 2. SMS_send_test
+Function is apparent
 
+# 3. Sensordata_storage
+Arduino IDE script for reading sensor data, logging them in non-volatile memory on the nano and allowing it to be read
+
+## Documentation for components:
+
+# DS18B20 Thermometer: 
+https://www.analog.com/media/en/technical-documentation/data-sheets/ds18b20.pdf
+
+# DFRobot Gravity Turbidity sensor:
 https://wiki.dfrobot.com/Turbidity_sensor_SKU__SEN0189
 
-https://lastminuteengineers.com/sim800l-gsm-module-arduino-tutorial/
-
-https://github.com/m5stack/M5Stack/blob/master/examples/Modules/SIM800L/send_short_message/send_short_message.ino
-
-https://docs.arduino.cc/hardware/nano/
-
-FOR SIM800L:
-- TxD (green) mapped to nano digitalPin 2 (w resistor in between)
-- RxD (blue) mapped to digitalPin 9
-- DTR (brown) (sleep mode activate) mapped to digitalPin 4
-- RST (grey) to digitalPin 7
