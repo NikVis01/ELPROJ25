@@ -8,7 +8,7 @@
 //// Hardware Specs: ////
 
 // Turbidity sensor: DFRobot Gravity turbidity sensor (analog pin 6 on nano)
-// Thermometer: Elektrokit DS18B20 thermometer (digital pin 11 on nano)
+// Thermometer: Elektrokit DS18B20 thermometer (digital pin 11 on nano), note circuit-wise there is a pull-up resistor. This is because the DS18B20 uses a one-wire system.
  
 // --- Considerations: EEPROM cell will be worn down with time if written to every day, but once a day is well within safe margins (EEPROM is rated for 100k write-cycles per cell)
 
@@ -24,7 +24,7 @@ const byte DAYS_TO_STORE = 7; // Starting with 7 for now
 const unsigned long ONE_DAY_MS = 24UL * 60UL * 60UL * 1000UL; // 24 hours, unsigned
 
 // --- Init temp sensor --- //
-OneWire oneWire(ONE_WIRE_BUS);
+OneWire oneWire(TEMP_PIN);
 DallasTemperature sensors(&oneWire);
 
 //// --- Memory allocation & Runtime state variables --- ////
