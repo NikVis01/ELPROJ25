@@ -1,4 +1,5 @@
 ### --- Python Script for retrieving stored sensor data from arduino nano --- ###
+### OBS: Don't have the arduino serial monitor open when running this script! ###
 
 import serial
 import time
