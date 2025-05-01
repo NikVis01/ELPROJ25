@@ -1,31 +1,33 @@
 ### --- Python Script for retrieving stored sensor data from arduino nano --- ###
 
 import serial
+import time
 
 class ArduinoDataRetriever:
     def __init__(self, port='/dev/ttyUSB0', baudrate=9600, timeout=10):
         self.ser = serial.Serial(port, baudrate)
         self.ser.reset_input_buffer() # Clears cached data in the serial buffer and old data
+        time.sleep(5)  # Wait for Arduino to reset
 
     def test_connection(self):
         # Mostly just for debugging 
         pass
 
     def retrieve_data(self):
-        self.ser.write(b'R')  # Command to retrieve data
+        self.ser.reset_input_buffer()
+        self.ser.write(b'R')  # Command to retrieve all stored data
+        time.sleep(0.5)  # Small delay to let Arduino respond
+
+        print("Retrieving stored data:\n")
         while True:
             if self.ser.in_waiting > 0:
-                line = self.ser.readline().decode('utf-8').rstrip()
+                line = self.ser.readline().decode('utf-8').strip()
                 if line == "END":
-                    print("Reading complete")
+                    print("--- End of data ---")
                     break
-                elif line == "END": # Accounting for this in the arduino code, so it'll print "END" when all data is read by retrieveAll function
-                    print("Reading complete")
-                    break
-
                 else:
-                    print("No data received")
-                    break
+                    print(line)
+
 
     def read_now(self):
         self.ser.reset_input_buffer()  # Clear old junk
@@ -45,7 +47,7 @@ class ArduinoDataRetriever:
 if __name__ == "__main__":
     print("Interface for BojBott\n")
 
-    retriever = ArduinoDataRetriever(port='/dev/ttyUSB0', baudrate=9600)
+    retriever = ArduinoDataRetriever()
 
     ### --- For testing read now and store purposes:
     retriever.read_now()

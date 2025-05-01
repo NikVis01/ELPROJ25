@@ -4,14 +4,28 @@
 // 3. Sets limit for max days (1k bytes should be enough for 100+ days of sensor data)
 // 4. Lets user retrieve sensor readings later by plugging in a laptop and running Retrieve.py (found on github)
 
+
+//// Hardware Specs: ////
+
+// Turbidity sensor: DFRobot Gravity turbidity sensor (analog pin 6 on nano)
+// Thermometer: Elektrokit DS18B20 thermometer (digital pin 11 on nano)
+ 
 // --- Considerations: EEPROM cell will be worn down with time if written to every day, but once a day is well within safe margins (EEPROM is rated for 100k write-cycles per cell)
 
+#include <EEPROM.h>
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 //// --- Defnining global variables & Pins --- // 
-const int TEMP_PIN = A6;
-const int TURBIDITY_PIN = A2; // Double check which pins i put these in
+const int TEMP_PIN = 11; // Digital Pin 11
+const int TURBIDITY_PIN = A6; // Double check which pins i put these in
 const byte DAYS_TO_STORE = 7; // Starting with 7 for now
 const unsigned long ONE_DAY_MS = 24UL * 60UL * 60UL * 1000UL; // 24 hours, unsigned
+
+// --- Init temp sensor --- //
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
 
 //// --- Memory allocation & Runtime state variables --- ////
 // addresses 0-31 are allocated for sensor readings (turbidity and temperature)
@@ -22,6 +36,8 @@ unsigned long last_log_time = 0;
 
 void setup() {
   Serial.begin(9600);
+  sensors.begin(); // Calling init temp sensor type shit
+  
   while (!Serial);  // Wait for Serial if connected
   EEPROM.get(32, current_day); // Writing current_day and last_log_time to addresses far enough away for those reserved for sensor data to account for sensor data storage 
   EEPROM.get(34, last_log_time); // Accounting for rough size estimate of runtime vars (2 bytes)
@@ -56,7 +72,7 @@ void loop() {
 void logToday() {
   // Reads sensor data and puts them in allocated memory
   // Each read returns a 10 bit val, corresponding to 2 bytes
-  int temp = analogRead(TEMP_PIN);
+  int temp = digitalRead(TEMP_PIN);
   int turb = analogRead(TURBIDITY_PIN);
   int addr = current_day * 4; // Calculating address offset, each day takes 4 bytes so day 0 -> addr 0-3, day 1 -> addr 4-7, etc...
   EEPROM.put(addr, temp);
@@ -66,20 +82,19 @@ void logToday() {
 
 // --- Logging Now Fn --- //
 void logNow() {
-  // Exactly like Log today fn but overwrites day 0 addresses so we dont take day into account (for testing)
-  int temp = analogRead(TEMP_PIN);
+  sensors.requestTemperatures();
+  float tempC = sensors.getTempCByIndex(0);
+  int temp = (int)(tempC * 100);
   int turb = analogRead(TURBIDITY_PIN);
 
-  // Overwrite day 0
   EEPROM.put(0, temp);
   EEPROM.put(2, turb);
 
-  // Send to Serial immediately
   Serial.print("Today - Temp=");
-  Serial.print(temp);
+  Serial.print(temp / 100.0);
   Serial.print(", Turbidity=");
   Serial.println(turb);
-  Serial.println("END");  // To signal end of data
+  Serial.println("END");
 }
 
 // --- Retrieval Fn --- //
@@ -92,7 +107,7 @@ void retrieveAll() {
     Serial.print("Day ");
     Serial.print(i);
     Serial.print(": Temp=");
-    Serial.print(temp);
+    Serial.print(temp / 100.0);
     Serial.print(", Turbidity=");
     Serial.println(turb);
     Serial.println("END"); // Will be picked up by python script to terminate read loop
