@@ -84,14 +84,15 @@ void logToday() {
 void logNow() {
   sensors.requestTemperatures();
   float tempC = sensors.getTempCByIndex(0);
-  int temp = (int)(tempC * 100);
+  int temp = (int)(tempC * 100);//multiply by 100 to keeo 2 decimal places
   int turb = analogRead(TURBIDITY_PIN);
+  turb = convertTurbidity(turb); // Convert turbidity to a more human-readable format (0-100)
 
   EEPROM.put(0, temp);
   EEPROM.put(2, turb);
 
   Serial.print("Today - Temp=");
-  Serial.print(temp / 100.0);
+  Serial.print(temp / 100.0); // multiply by 100 to keeo 2 decimal places
   Serial.print(", Turbidity=");
   Serial.println(turb);
   Serial.println("END");
@@ -112,4 +113,16 @@ void retrieveAll() {
     Serial.println(turb);
     Serial.println("END"); // Will be picked up by python script to terminate read loop
   }
+}
+
+void convertTurbidity(int turb) {
+  // Converts turbidity reading to a more human-readable format (0-100)
+  //Right the values range from 950-711, so we can convert them to a 0-100 scale
+  turb = map(turb, 711, 950, 0, 100);
+  if (turb < 0) {
+    turb = 0; // Clamp to 0 if below
+  } else if (turb > 100) {
+    turb = 100; // Clamp to 100 if above
+  }
+  return turb; // Return the converted value
 }
