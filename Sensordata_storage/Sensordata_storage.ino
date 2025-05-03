@@ -1,4 +1,4 @@
-// --- Sketch for continous sensor data logging and storage on-board the Arduino Nano in EEPROM (non-voletile memory)
+  // --- Sketch for continous sensor data logging and storage on-board the Arduino Nano in EEPROM (non-voletile memory)
 // 1. Reads Turbidity and Temperature sensor outputs once a day
 // 2. Stores the readings in memory
 // 3. Sets limit for max days (1k bytes should be enough for 100+ days of sensor data)
@@ -13,49 +13,60 @@
 // --- Considerations: EEPROM cell will be worn down with time if written to every day, but once a day is well within safe margins (EEPROM is rated for 100k write-cycles per cell)
 
 #include <EEPROM.h>
-
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-//// --- Defnining global variables & Pins --- // 
+//// --- Defining global variables & Pins --- // 
 const int TEMP_PIN = 11; // Digital Pin 11
-const int TURBIDITY_PIN = A6; // Double check which pins i put these in
-const byte DAYS_TO_STORE = 7; // Starting with 7 for now
-const unsigned long ONE_DAY_MS = 24UL * 60UL * 60UL * 1000UL; // 24 hours, unsigned
+const int TURBIDITY_PIN = A6; // Analog Pin 6
+const unsigned long LOG_INTERVAL_MS = 10000; // Log every 60 seconds (adjust as needed)
 
-// --- Init temp sensor --- //
+// --- Initialize sensors --- //
 OneWire oneWire(TEMP_PIN);
 DallasTemperature sensors(&oneWire);
 
 //// --- Memory allocation & Runtime state variables --- ////
-// addresses 0-31 are allocated for sensor readings (turbidity and temperature)
-// Assuming sensors require 2bytes each we have (2+2)*7 = 28 (starting at 0 gives address 27 as final address for sensors) and adding a buffer at addresses 28-32 means we can store runtime vars in 32+
- 
-int current_day = 0;
+// Each reading takes 8 bytes: 4 bytes for timestamp, 2 bytes for temperature, 2 bytes for turbidity
+// Runtime variables are stored at the end of EEPROM
+const int MAX_READINGS = 125; // 1000 bytes of EEPROM / 8 bytes per reading
+const int EEPROM_SIZE = 1024; // Total EEPROM size
+const int RUNTIME_VARS_START = EEPROM_SIZE - 2; // Start of runtime variable (current_index)
+
 unsigned long last_log_time = 0;
 
 void setup() {
   Serial.begin(9600);
-  sensors.begin(); // Calling init temp sensor type shit
-  
-  while (!Serial);  // Wait for Serial if connected
-  EEPROM.get(32, current_day); // Writing current_day and last_log_time to addresses far enough away for those reserved for sensor data to account for sensor data storage 
-  EEPROM.get(34, last_log_time); // Accounting for rough size estimate of runtime vars (2 bytes)
+  sensors.begin();
 
+  while (!Serial);  // Wait for Serial if connected
+
+  delay(1000); // Give time for the serial monitor to open
+  
+  // Initialize current_index if not already set
+  int current_index;
+  EEPROM.get(RUNTIME_VARS_START, current_index);
+
+  if (current_index < 0 || current_index >= MAX_READINGS) {
+    current_index = 0;
+    EEPROM.put(RUNTIME_VARS_START, current_index);
+  }
+
+  delay(1000); // Give time for the serial monitor to open
+  
 }
 
-// --- Main Loop --- //
 void loop() {
-  // Designed to continously check (once per sec) if its time to read the data from the sensors, depending on how much time has passed since latest log time
-  unsigned long now = millis(); // millis() tracks no. of seconds since system init (nano powered on)
-  if ((now - last_log_time >= ONE_DAY_MS) && current_day < DAYS_TO_STORE) {
-    logToday();
+  unsigned long now = millis();
+
+  // Log data periodically based on the defined interval
+  if (now - last_log_time >= LOG_INTERVAL_MS) {
+    logNow();
     last_log_time = now;
-    EEPROM.put(30, current_day);
-    EEPROM.put(32, last_log_time);
   }
+
+  // Handle serial commands
   if (Serial.available()) {
-  char c = Serial.read();
+    char c = Serial.read();
     if (c == 'R') {
       retrieveAll();
     }
@@ -64,65 +75,90 @@ void loop() {
     }
   }
 
-  delay(1000); // Currently checking once per second for testing, but this can be increased to minimize idle CPU usage
-
-}
-
-// --- Logging Today Fn --- //
-void logToday() {
-  // Reads sensor data and puts them in allocated memory
-  // Each read returns a 10 bit val, corresponding to 2 bytes
-  int temp = digitalRead(TEMP_PIN);
-  int turb = analogRead(TURBIDITY_PIN);
-  int addr = current_day * 4; // Calculating address offset, each day takes 4 bytes so day 0 -> addr 0-3, day 1 -> addr 4-7, etc...
-  EEPROM.put(addr, temp);
-  EEPROM.put(addr + 2, turb);
-  current_day++; // Incrementing day
+  delay(1000); // Reduce CPU usage
 }
 
 // --- Logging Now Fn --- //
 void logNow() {
+/*this function */
+
+  int current_index;
+  EEPROM.get(RUNTIME_VARS_START, current_index);
+
+  // Stop logging if EEPROM is full
+  if (current_index >= MAX_READINGS) {
+    Serial.println("EEPROM is full. No more data will be logged.");
+    return;
+  }
+
   sensors.requestTemperatures();
   float tempC = sensors.getTempCByIndex(0);
-  int temp = (int)(tempC * 100);//multiply by 100 to keeo 2 decimal places
+  int temp = (int)(tempC * 100); // Multiply by 100 to keep 2 decimal places
   int turb = analogRead(TURBIDITY_PIN);
-  turb = convertTurbidity(turb); // Convert turbidity to a more human-readable format (0-100)
+  unsigned long timestamp = millis();
 
-  EEPROM.put(0, temp);
-  EEPROM.put(2, turb);
+  // Calculate EEPROM address for the current reading
+  int addr = current_index * 8;
 
-  Serial.print("Today - Temp=");
-  Serial.print(temp / 100.0); // multiply by 100 to keeo 2 decimal places
+  // Write data to EEPROM
+  EEPROM.put(addr, timestamp);
+  EEPROM.put(addr + 4, temp);
+  EEPROM.put(addr + 6, turb);
+
+  // Update current_index
+  current_index++;
+  EEPROM.put(RUNTIME_VARS_START, current_index);
+
+  // Print the logged data and timestamp to Serial Monitor
+  Serial.print("Logged data: ");
+  Serial.print("Index=");
+  Serial.print(current_index - 1);
+  Serial.print(" Logged - Temp=");
+  Serial.print(temp / 100.0);
   Serial.print(", Turbidity=");
-  Serial.println(turb);
-  Serial.println("END");
+  Serial.print(turb);
+  Serial.print(", Timestamp=");
+  String timestamp_string = turnTimestampToString(timestamp);
+  Serial.println(timestamp_string);
 }
 
 // --- Retrieval Fn --- //
 void retrieveAll() {
-  // Loops through readings for each "day" and prints them in the serial
-  for (int i = 0; i < current_day; i++) {
+  int current_index;
+  EEPROM.get(RUNTIME_VARS_START, current_index);
+
+  for (int i = 0; i < current_index; i++) {
+    int addr = i * 8;
+    unsigned long timestamp;
     int temp, turb;
-    EEPROM.get(i * 4, temp);
-    EEPROM.get(i * 4 + 2, turb);
-    Serial.print("Day ");
+
+    EEPROM.get(addr, timestamp);
+    EEPROM.get(addr + 4, temp);
+    EEPROM.get(addr + 6, turb);
+
+    Serial.print("Reading ");
     Serial.print(i);
     Serial.print(": Temp=");
     Serial.print(temp / 100.0);
     Serial.print(", Turbidity=");
-    Serial.println(turb);
-    Serial.println("END"); // Will be picked up by python script to terminate read loop
+    Serial.print(turb);
+    Serial.print(", Timestamp=");
+    Serial.println(timestamp);
   }
 }
 
-void convertTurbidity(int turb) {
-  // Converts turbidity reading to a more human-readable format (0-100)
-  //Right the values range from 950-711, so we can convert them to a 0-100 scale
-  turb = map(turb, 711, 950, 0, 100);
-  if (turb < 0) {
-    turb = 0; // Clamp to 0 if below
-  } else if (turb > 100) {
-    turb = 100; // Clamp to 100 if above
-  }
-  return turb; // Return the converted value
+
+String turnTimestampToString(unsigned long timestamp) {
+  // Convert milliseconds to seconds
+  unsigned long seconds = timestamp / 1000;
+  // Convert seconds to hours, minutes, and seconds
+  unsigned long hours = seconds / 3600;
+  unsigned long minutes = (seconds % 3600) / 60;
+  unsigned long secs = seconds % 60;
+  
+  // Format the string
+  char buffer[50];
+  snprintf(buffer, sizeof(buffer), "%02lu:%02lu:%02lu", hours, minutes, secs);
+  
+  return String(buffer);
 }
