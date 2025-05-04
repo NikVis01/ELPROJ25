@@ -18,7 +18,7 @@
 
 //// --- Defining global variables & Pins --- // 
 const int TEMP_PIN = 11; // Digital Pin 11
-const int TURBIDITY_PIN = A6; // Analog Pin 6
+const int TURBIDITY_PIN = A2; // Analog Pin 2
 const unsigned long LOG_INTERVAL_MS = 10000; // Log every 60 seconds (adjust as needed)
 
 // --- Initialize sensors --- //
@@ -73,6 +73,13 @@ void loop() {
     if (c == 'L') {
       logNow();
     }
+    //reset current index to 0
+    if (c == 'C') {
+      int current_index = 0;
+      EEPROM.put(RUNTIME_VARS_START, current_index);
+      Serial.println("Current index reset to 0.");
+    }
+
   }
 
   delay(1000); // Reduce CPU usage
@@ -95,6 +102,7 @@ void logNow() {
   float tempC = sensors.getTempCByIndex(0);
   int temp = (int)(tempC * 100); // Multiply by 100 to keep 2 decimal places
   int turb = analogRead(TURBIDITY_PIN);
+  turb = convertTurbidity(turb); // Convert turbidity reading to 0-100 scale
   unsigned long timestamp = millis();
 
   // Calculate EEPROM address for the current reading
@@ -147,6 +155,20 @@ void retrieveAll() {
   }
 }
 
+//function that turns turbidity reading from 740-0 to 100-0. Capped at 100 and 0
+int convertTurbidity(int turbidity) {
+  // Map the turbidity value from 0-740 to 0-100
+  int converted = map(turbidity, 0, 740, 0, 100);
+  
+  // Cap the value at 100 and 0
+  if (converted > 100) {
+    converted = 100;
+  } else if (converted < 0) {
+    converted = 0;
+  }
+  
+  return converted;
+}
 
 String turnTimestampToString(unsigned long timestamp) {
   // Convert milliseconds to seconds
