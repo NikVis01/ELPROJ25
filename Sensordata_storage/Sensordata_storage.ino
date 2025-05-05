@@ -79,6 +79,9 @@ void loop() {
       EEPROM.put(RUNTIME_VARS_START, current_index);
       Serial.println("Current index reset to 0.");
     }
+    if (c == 'D') {
+      printStoredData();
+    }
 
   }
 
@@ -136,6 +139,29 @@ void logNow() {
   Serial.print(timestamp_string);
   Serial.println(")");
 
+}
+
+//Function that prints the stored data raw as a csv list and "END" in the end
+void printStoredData() {
+  int current_index;
+  EEPROM.get(RUNTIME_VARS_START, current_index);
+
+  for (int i = 0; i < current_index; i++) {
+    int addr = i * 8;
+    unsigned long timestamp;
+    int temp, turb;
+
+    EEPROM.get(addr, timestamp);
+    EEPROM.get(addr + 4, temp);
+    EEPROM.get(addr + 6, turb);
+
+    Serial.print(timestamp);
+    Serial.print(",");
+    Serial.print(temp / 100.0);
+    Serial.print(",");
+    Serial.println(turb);
+  }
+  Serial.println("END");
 }
 
 // --- Retrieval Fn --- //

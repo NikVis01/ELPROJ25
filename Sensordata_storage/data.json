@@ -1,1 +1,1 @@
-{"error": "Failed to connect to Arduino."}
+[{"timestamp": 10765, "temperature": 20.31, "turbidity": 732.0}, {"timestamp": 21483, "temperature": 20.37, "turbidity": 733.0}, {"timestamp": 10761, "temperature": 20.37, "turbidity": 732.0}, {"timestamp": 21483, "temperature": 20.37, "turbidity": 733.0}, {"timestamp": 32204, "temperature": 20.37, "turbidity": 733.0}, {"timestamp": 4761, "temperature": 21.37, "turbidity": 729.0}]
