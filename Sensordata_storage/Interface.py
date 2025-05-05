@@ -32,6 +32,7 @@ class ArduinoDataRetriever:
 
 
     def read_now(self):
+        ## prints the data from the arduino serial monitor and returns it as a string
         self.ser.reset_input_buffer()  # Clear old junk
         self.ser.write(b'L')  # Command to log now and respond
 

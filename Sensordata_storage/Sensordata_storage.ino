@@ -19,7 +19,7 @@
 //// --- Defining global variables & Pins --- // 
 const int TEMP_PIN = 11; // Digital Pin 11
 const int TURBIDITY_PIN = A2; // Analog Pin 2
-const unsigned long LOG_INTERVAL_MS = 60000; // Log every 60 seconds (adjust as needed)
+const unsigned long LOG_INTERVAL_MS = 1200000; // Log every 60 seconds (adjust as needed)
 
 // --- Initialize sensors --- //
 OneWire oneWire(TEMP_PIN);
@@ -102,7 +102,7 @@ void logNow() {
   float tempC = sensors.getTempCByIndex(0);
   int temp = (int)(tempC * 100); // Multiply by 100 to keep 2 decimal places
   int turb = analogRead(TURBIDITY_PIN);
-  turb = convertTurbidity(turb); // Convert turbidity reading to 0-100 scale
+  //turb = convertTurbidity(turb); // Convert turbidity reading to 0-100 scale
   unsigned long timestamp = millis();
 
   // Calculate EEPROM address for the current reading
@@ -125,9 +125,17 @@ void logNow() {
   Serial.print(temp / 100.0);
   Serial.print(", Turbidity=");
   Serial.print(turb);
+  int mappedTurb = convertTurbidity(turb);
+  Serial.print("(");
+  Serial.print(mappedTurb);
+  Serial.print(")");
   Serial.print(", Timestamp=");
   String timestamp_string = turnTimestampToString(timestamp);
-  Serial.println(timestamp_string);
+  Serial.print(timestamp);
+  Serial.print(" (");
+  Serial.print(timestamp_string);
+  Serial.println(")");
+
 }
 
 // --- Retrieval Fn --- //
@@ -145,13 +153,22 @@ void retrieveAll() {
     EEPROM.get(addr + 6, turb);
 
     Serial.print("Reading ");
+    //Using arduino syntax, allocate 3 char spaces for the index
     Serial.print(i);
     Serial.print(": Temp=");
     Serial.print(temp / 100.0);
     Serial.print(", Turbidity=");
     Serial.print(turb);
+    int mappedTurb = convertTurbidity(turb);
+    Serial.print("(");
+    Serial.print(mappedTurb);
+    Serial.print(")");
     Serial.print(", Timestamp=");
-    Serial.println(timestamp);
+    Serial.print(timestamp);
+    Serial.print(" (");
+    String timestamp_string = turnTimestampToString(timestamp);
+    Serial.print(timestamp_string);
+    Serial.println(")");
   }
 }
 

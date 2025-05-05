@@ -40,38 +40,50 @@
     </table>
 
     <script>
+        // Fetch data from the /data endpoint and populate the table
         async function fetchData() {
-            const response = await fetch('/data');
-            const data = await response.json();
-            const tableBody = document.querySelector('#data-table tbody');
-            tableBody.innerHTML = '';
-            data.forEach(row => {
-                const formattedTime = formatMilliseconds(row.timestamp);
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${formattedTime}</td>
-                    <td>${row.temperature}</td>
-                    <td>${row.turbidity}</td>
-                `;
-                tableBody.appendChild(tr);
-            });
+            try {
+                const response = await fetch('/data'); // Call the /data endpoint
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json(); // Parse the JSON response
+                const tableBody = document.querySelector('#data-table tbody');
+                tableBody.innerHTML = ''; // Clear the table body
+
+                // Populate the table with the data
+                data.forEach(row => {
+                    const formattedTime = formatMilliseconds(row.timestamp);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${formattedTime}</td>
+                        <td>${row.temperature.toFixed(2)}</td>
+                        <td>${row.turbidity.toFixed(2)}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         }
 
+        // Format milliseconds into days, hours, minutes, and seconds
         function formatMilliseconds(milliseconds) {
             const totalSeconds = Math.floor(milliseconds / 1000);
             const days = Math.floor(totalSeconds / (24 * 3600));
             const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
             const seconds = totalSeconds % 60;
-            print(f"{days}d {hours}h {minutes}m {seconds}s")
+
             return `${days}d ${hours}h ${minutes}m ${seconds}s`;
         }
 
+        // Trigger the /download endpoint to download the JSON file
         function downloadData() {
             window.location.href = '/download';
         }
 
-        // Fetch data on page load
+        // Fetch data when the page loads
         fetchData();
     </script>
 </body>
