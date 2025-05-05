@@ -4,8 +4,9 @@
 import serial
 import time
 
+
 class ArduinoDataRetriever:
-    def __init__(self, port='/dev/ttyUSB0', baudrate=9600, timeout=10):
+    def __init__(self, port='COM3', baudrate=9600, timeout=10):
         self.ser = serial.Serial(port, baudrate)
         self.ser.reset_input_buffer() # Clears cached data in the serial buffer and old data
         time.sleep(5)  # Wait for Arduino to reset

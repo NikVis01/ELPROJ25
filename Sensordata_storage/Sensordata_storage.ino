@@ -19,7 +19,7 @@
 //// --- Defining global variables & Pins --- // 
 const int TEMP_PIN = 11; // Digital Pin 11
 const int TURBIDITY_PIN = A2; // Analog Pin 2
-const unsigned long LOG_INTERVAL_MS = 10000; // Log every 60 seconds (adjust as needed)
+const unsigned long LOG_INTERVAL_MS = 60000; // Log every 60 seconds (adjust as needed)
 
 // --- Initialize sensors --- //
 OneWire oneWire(TEMP_PIN);

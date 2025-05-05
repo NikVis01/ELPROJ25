@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Data Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sensor Data Viewer</h1>
+    <button onclick="downloadData()">Download JSON</button>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Temperature (°C)</th>
+                <th>Turbidity</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
+
+    <script>
+        async function fetchData() {
+            const response = await fetch('/data');
+            const data = await response.json();
+            const tableBody = document.querySelector('#data-table tbody');
+            tableBody.innerHTML = '';
+            data.forEach(row => {
+                const formattedTime = formatMilliseconds(row.timestamp);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formattedTime}</td>
+                    <td>${row.temperature}</td>
+                    <td>${row.turbidity}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function formatMilliseconds(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const days = Math.floor(totalSeconds / (24 * 3600));
+            const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            print(f"{days}d {hours}h {minutes}m {seconds}s")
+            return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        function downloadData() {
+            window.location.href = '/download';
+        }
+
+        // Fetch data on page load
+        fetchData();
+    </script>
+</body>
+</html>
