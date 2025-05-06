@@ -1,1 +1,10 @@
-[{"timestamp": 10765, "temperature": 20.31, "turbidity": 732.0}, {"timestamp": 21483, "temperature": 20.37, "turbidity": 733.0}, {"timestamp": 10761, "temperature": 20.37, "turbidity": 732.0}, {"timestamp": 21483, "temperature": 20.37, "turbidity": 733.0}, {"timestamp": 32204, "temperature": 20.37, "turbidity": 733.0}, {"timestamp": 4761, "temperature": 21.37, "turbidity": 729.0}, {"timestamp": 1200947, "temperature": 22.25, "turbidity": 727.0}, {"timestamp": 2401688, "temperature": 22.18, "turbidity": 726.0}]
+[
+  { "timestamp": 10765, "temperature": 20.31, "turbidity": 732.0 },
+  { "timestamp": 21483, "temperature": 20.37, "turbidity": 733.0 },
+  { "timestamp": 10761, "temperature": 20.37, "turbidity": 732.0 },
+  { "timestamp": 21483, "temperature": 20.37, "turbidity": 733.0 },
+  { "timestamp": 32204, "temperature": 20.37, "turbidity": 733.0 },
+  { "timestamp": 4761, "temperature": 21.37, "turbidity": 729.0 },
+  { "timestamp": 1200947, "temperature": 22.25, "turbidity": 727.0 },
+  { "timestamp": 2401688, "temperature": 22.18, "turbidity": 726.0 }
+]
