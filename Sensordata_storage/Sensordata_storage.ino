@@ -17,9 +17,9 @@
 #include <DallasTemperature.h>
 
 //// --- Defining global variables & Pins --- // 
-const int TEMP_PIN = 11; // Digital Pin 11
-const int TURBIDITY_PIN = A2; // Analog Pin 2
-const unsigned long LOG_INTERVAL_MS = 1200000; // Log every 60 seconds (adjust as needed)
+const int TEMP_PIN = 2; // Digital Pin 2
+const int TURBIDITY_PIN = A7; // Analog Pin A7
+const unsigned long LOG_INTERVAL_MS = 100000; // Log every 10 seconds (adjust as needed)
 
 // --- Initialize sensors --- //
 OneWire oneWire(TEMP_PIN);

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sensor Data Viewer</title>
+    <title>Bojbot Sensor Data Viewer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,23 +21,57 @@
         th {
             background-color: #f4f4f4;
         }
+        .logo {
+            position: absolute;
+            top: 5px;
+            right: 20px;
+            max-width: 90px; /* Adjust the size of the logo */
+        }
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .info-box h2 {
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
-    <h1>Sensor Data Viewer</h1>
+    <!-- Add the logo -->
+    <img src="/static/logga.png" alt="Company Logo" class="logo">
+
+    <h1>Bojbot Sensor Data Viewer</h1>
     <button onclick="downloadData()">Download JSON</button>
     <table id="data-table">
         <thead>
             <tr>
                 <th>Timestamp</th>
                 <th>Temperature (°C)</th>
-                <th>Turbidity</th>
+                <th>Turbidity (%)</th>
             </tr>
         </thead>
         <tbody>
             <!-- Data will be populated here -->
         </tbody>
     </table>
+
+    <!-- Add the info box below the table -->
+    <div class="info-box">
+        <h2>Swimming Conditions Based on Turbidity</h2>
+        <p>
+            Turbidity is a measure of water clarity. The following guidelines can help determine if swimming conditions are acceptable:
+        </p>
+        <ul>
+            <li><strong>80-100%:</strong> Excellent clarity. Ideal for swimming.</li>
+            <li><strong>60-79%:</strong> Good clarity. Swimming is generally safe.</li>
+            <li><strong>40-59%:</strong> Moderate clarity. Caution is advised, especially for children or those with sensitive skin.</li>
+            <li><strong>20-39%:</strong> Poor clarity. Swimming is not recommended.</li>
+            <li><strong>0-19%:</strong> Very poor clarity. Avoid swimming due to potential health risks.</li>
+        </ul>
+    </div>
 
     <script>
         // Fetch data from the /data endpoint and populate the table

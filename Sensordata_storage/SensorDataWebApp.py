@@ -144,5 +144,18 @@ def download():
         return jsonify({"error": "Failed to generate JSON file."})
 
 
+# function that turns turbidity reading from 740-0 to 100-0. Capped at 100 and 0
+def convertTurbidity(turbidity): 
+  converted = map(turbidity, 0, 740, 0, 100)
+  
+  if converted > 100: 
+      converted = 100
+  elif converted < 0: 
+    converted = 0
+  
+  return converted
+
+
+
 if __name__ == "__main__":
     app.run(debug=False)
